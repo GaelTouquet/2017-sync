@@ -144,8 +144,8 @@ def scanForDiff(tree1, tree2, branch_names, scan_var='pt_1', index_var='evt'):
             diff_events.append(ind)
             print 'Event', ind
             for branch in branch_names:
-                v1 = getattr(tree1, branch)
-                v2 = getattr(tree2, branch)
+                v1 = getattr(tree1, branch, -9999.)
+                v2 = getattr(tree2, branch, -9999.)
                 # if round(v1, 6) != round(v2, 6) and v1 > -99.:
                 if True:
                     print '{b:>43}: {v1:>8.4f}, {v2:>8.4f}'.format(b=branch, v1=v1, v2=v2)
@@ -207,7 +207,15 @@ if __name__ == '__main__':
 
     # find all branches that exist in all files
 
-    b_names = [set([b.GetName() for b in t.GetListOfBranches()]) for t in trees]
+    b_names = []
+    for t in trees:
+        treevars = []
+        if t.GetListOfAliases():
+            for var in t.GetListOfAliases():
+                treevars.append(var.GetName())
+        for b in t.GetListOfBranches():
+            treevars.append(b.GetName())
+        b_names.append(set(treevars))
 
     u_names = set.intersection(*b_names)
 
